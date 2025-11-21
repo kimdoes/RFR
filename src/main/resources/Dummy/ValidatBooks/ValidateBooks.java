@@ -1,4 +1,5 @@
-package com.jamongsalguclub.RFR.ValidatBooks;
+/*
+package com.jamongsalguclub.RFR.Dummy.ValidatBooks;
 
 import com.jamongsalguclub.RFR.DTO.BookValidationDTO.BookValidationDTO;
 import com.jamongsalguclub.RFR.DTO.ChatDTO.BookItemsDTO;
@@ -81,7 +82,7 @@ public class ValidateBooks {
         return false;
     }
 }
-
+ */
 /*
 GPTRequest request = new GPTRequest(model, content, prompt);
         GPTResponse response = restTemplate.postForObject(apiUrl, request, GPTResponse.class);

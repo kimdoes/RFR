@@ -1,3 +1,4 @@
+/*
 package com.jamongsalguclub.RFR.DTO.ChatDTO;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -18,3 +19,4 @@ public class BookItemsDTO {
     private String recommendReason;
     private String[] tag;
 }
+*/
