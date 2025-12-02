@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ReasonForRead</title>
+</head>
+<body>
+<div class="getUserMessage">
+    <textarea id="Chat-input" class="roros" placeholder="메세지를 입력하세오"></textarea>
+    <button id="gogo" class="btngogo">보내기</button>
+</div>
+<script>
+    let sendbutton = document.querySelector(".btngogo");
+    sendbutton.addEventListener('click',getUserMessage);
+
+    function getUserMessage(){
+        let message = document.querySelector(".roros");
+        let userMessage = message.value;
+        sendUserMessage(userMessage);
+    }
+
+    function sendUserMessage(message) {
+        let body = JSON.stringify({
+            'message': message
+        });
+
+        fetch("http://localhost:8080/books", {
+            method: 'POST',
+            cache: 'no-cache',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: body
+        })
+        .then((response) => response.json())
+            .then((data) => getBooksFromJSON(data))
+            .then((books) => foundBooksInIndex(books))
+    }
+
+    function getBooksFromJSON(data){
+        return data.items.books;
+    }
+
+    function foundBooksInIndex(data){
+        let len = data.length;
+
+        for (let i = 0; i < len; i++){
+            let isEnd;
+
+            if (i === len){
+                isEnd = true;
+            } else {
+                isEnd = false;
+            }
+            createElement(data[i], isEnd);
+        }
+    }
+
+    function createElement(book, isEnd){
+        const booksDiv = document.createElement("div");
+        const buttons = document.createElement("div");
+        const bookInfo = document.createElement("div");
+
+        const bookTitle = document.createElement("span");
+        const bookMetaData = document.createElement("span");
+        const tags = document.createElement("p");
+        const description = document.createElement("p");
+        const recReason = document.createElement("p");
+        const bookImg = document.createElement("img");
+
+        const buyButtonSrc = document.createElement("a");
+        const buyButton = document.createElement("button");
+        const bookMarkButton = document.createElement("button");
+
+        bookInfo.className="BooksInfo";
+
+        bookImg.className = "bookImg";
+        bookImg.src = book.image;
+        console.log(book.image);
+
+        bookTitle.className = "bookTitle";
+        bookTitle.textContent = book.title;
+
+        bookMetaData.className = "bookMetaData";
+        bookMetaData.textContent = book.author + " | " + book.publisher + " 출판 | " + book.pubdate;
+
+//        let tag;
+//        for (let i = 0; i < book.tags.length; i++){
+//            tag + book.tags[i];
+ //       }
+
+        tags.className = "hashTag";
+        tags.textContent = (book.tag || []).join(" ");
+
+        description.className = "bookDescrip";
+        description.textContent = book.description;
+
+        recReason.className = "recReason";
+        recReason.textContent = book.reason;
+
+        bookInfo.appendChild(bookImg)
+        bookInfo.appendChild(bookTitle);
+        bookInfo.appendChild(bookMetaData);
+        bookInfo.appendChild(tags)
+        bookInfo.appendChild(description)
+        bookInfo.appendChild(recReason);
+        //----------------------------------------------------------------------------
+        buttons.className = "buttons";
+
+        buyButtonSrc.href = book.link;
+        buyButton.textContent = "책 구매하기";
+        bookMarkButton.textContent = "북마크하기";
+
+        buyButtonSrc.appendChild(buyButton)
+        buttons.appendChild(buyButtonSrc)
+        buttons.appendChild(bookMarkButton);
+
+        booksDiv.appendChild(bookInfo)
+        booksDiv.appendChild(buttons);
+
+        if (isEnd) {
+            document.body.appendChild(booksDiv);
+        } else {
+            const endLine = document.createElement("div");
+            endLine.className = "endLine";
+
+            booksDiv.appendChild(endLine);
+            document.body.appendChild(booksDiv);
+        }
+
+    }
+</script>
+</body>
+</html>

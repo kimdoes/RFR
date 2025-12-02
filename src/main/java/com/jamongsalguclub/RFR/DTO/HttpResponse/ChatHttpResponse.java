@@ -1,6 +1,6 @@
 package com.jamongsalguclub.RFR.DTO.HttpResponse;
 
-import com.jamongsalguclub.RFR.DTO.BookDTO.BookResponseDTO;
+import com.jamongsalguclub.RFR.DTO.ChatDTO.BookInfosDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,5 +17,5 @@ import lombok.NoArgsConstructor;
 public class ChatHttpResponse {
     int code;
     String message;
-    BookResponseDTO[] items;
+    BookInfosDTO items;
 }

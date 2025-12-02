@@ -3,6 +3,7 @@ package com.jamongsalguclub.RFR.DTO.ChatDTO;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.jamongsalguclub.RFR.DTO.BookDTO.BookResponseDTO;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -12,6 +13,7 @@ import lombok.NoArgsConstructor;
  * booksZero가 false일 경우 추천되는 책이 있다는 뜻입니다.
  */
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class BookInfosDTO {

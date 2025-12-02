@@ -112,7 +112,7 @@ class SendMessagesToAI {
                 ChatHttpResponse chatHttpResponse = ChatHttpResponse.builder()
                         .code(200)
                         .message("성공")
-                        .items(bookInfos.getBooks())
+                        .items(bookInfos)
                         .build();
 
                 return ResponseEntity.ok(chatHttpResponse);
