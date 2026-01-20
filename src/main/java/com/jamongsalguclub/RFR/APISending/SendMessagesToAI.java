@@ -2,6 +2,7 @@ package com.jamongsalguclub.RFR.APISending;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jamongsalguclub.RFR.DTO.BookDTO.BookDTO;
+import com.jamongsalguclub.RFR.DTO.BookDTO.BookResponseDTO;
 import com.jamongsalguclub.RFR.DTO.ChatDTO.BookInfosDTO;
 import com.jamongsalguclub.RFR.DTO.ChatDTO.PickedKeywords;
 import com.jamongsalguclub.RFR.DTO.ChatDTO.RecommendBooksDTO;
@@ -11,6 +12,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
+
+import java.awt.print.Book;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 유저와 네이버책검색API, OPENAI API의 중개자 역할을 맡은 클래스입니다.<br><br>
@@ -89,6 +95,14 @@ class SendMessagesToAI {
             try {
                 String[] tags = pickedKeywords.getKeywords();
                 BookDTO[] response = sendingBookApiProvider.SearchBooks(tags);
+                Map<String, String> links = new HashMap<>();
+
+                System.out.println("link1: " + response[0].getLink());
+
+                for (int  i = 0; i < response.length; i++) {
+                    if (response[i] == null) break;
+                    links.put(response[i].getTitle(), response[i].getLink());
+                }
 
                 RecommendBooksDTO recommendBooksDTO = RecommendBooksDTO.builder()
                         .userQuestion(message)
@@ -100,7 +114,7 @@ class SendMessagesToAI {
 
                 BookInfosDTO bookInfos = objectMapper.readValue(recommendedBooksInString, BookInfosDTO.class);
 
-                if (!bookInfos.isBooksZero()) {
+                if (bookInfos.isBooksZero()) {
                     ChatHttpResponse responseForOb = ChatHttpResponse.builder()
                             .code(500)
                             .message("추천되는 아이템이 없습니다!")
@@ -115,7 +129,13 @@ class SendMessagesToAI {
                         .items(bookInfos)
                         .build();
 
+                for (BookResponseDTO book : bookInfos.getBooks()){
+                    book.setLink(links.get(book.getTitle()));
+                }
+
+                System.out.println("link2: " + bookInfos.getBooks()[0].getLink());
                 return ResponseEntity.ok(chatHttpResponse);
+
             } catch (Exception e) {
                 e.printStackTrace();
                 return null;

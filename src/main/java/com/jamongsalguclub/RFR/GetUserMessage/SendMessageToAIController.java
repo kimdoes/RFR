@@ -84,7 +84,7 @@ public class SendMessageToAIController {
 
         String message = chatHttpRequestDTO.getMessage();
         System.out.println(message);
-        return ResponseEntity.ok(chatHttpResponse);
-        //return sendMessageService.sendMessage(message);
+        //return ResponseEntity.ok(chatHttpResponse);
+        return sendMessageService.sendMessage(message);
     }
 }

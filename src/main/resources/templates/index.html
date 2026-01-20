@@ -1,25 +1,451 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <title>ReasonForRead</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        p {
+            margin: 0;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background-color: #2b2b2b;
+            font-family: "나눔바른고딕", -apple-system, BlinkMacSystemFont, sans-serif;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        /* 전체 컨테이너 */
+        .container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* 메인 상태: 중앙 정렬 */
+        .container.main-state {
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* 검색 결과 상태: 상단 정렬 */
+        .container.search-state {
+            justify-content: flex-start;
+            padding-top: 40px;
+        }
+
+        /* 로고 & 제목 영역 */
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .search-state .header {
+            margin-bottom: 30px;
+            transform: scale(0.85);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background-color: #f8b58e;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .logo-text {
+            font-size: 42px;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: -1px;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: #999;
+            font-weight: 400;
+            margin-top: 8px;
+            opacity: 0.85;
+        }
+
+        /* 검색창 컨테이너 */
+        .search-wrapper {
+            width: 100%;
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 0 20px;
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .search-state .search-wrapper {
+            max-width: 900px;
+        }
+
+        /* 입력창 + 버튼 컨테이너 */
+        .getUserMessage {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* textarea - 덜 둥글게, 그림자 최소화 */
+        .roros {
+            width: 100%;
+            height: 52px;
+            min-height: 52px;
+            padding: 14px 20px;
+            border-radius: 8px;
+            border: 2px solid transparent;
+            background-color: #3a3a3a;
+            color: #ffffff;
+            font-size: 15px;
+            font-family: inherit;
+            outline: none;
+            resize: none;
+            overflow-y: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease, height 0.2s ease;
+        }
+
+        .roros::placeholder {
+            color: #888;
+        }
+
+        .roros:focus {
+            background-color: #404040;
+            border-color: #f8b58e;
+            box-shadow: 0 2px 8px rgba(248, 181, 142, 0.25);
+            height: auto;
+        }
+
+        /* 검색 상태일 때 검색창 스타일 */
+        .search-state .roros {
+            height: 48px;
+            min-height: 48px;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        /* 전송 버튼 - 중간 둥글기 */
+        .btngogo {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            border: none;
+            background: linear-gradient(135deg, #f8b58e 0%, #f5a572 100%);
+            box-shadow: 0 2px 8px rgba(248, 181, 142, 0.3);
+            cursor: pointer;
+            font-size: 18px;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .btngogo:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 12px rgba(248, 181, 142, 0.4);
+            background: linear-gradient(135deg, #f5a572 0%, #f39154 100%);
+        }
+
+        .btngogo:active {
+            transform: translateY(0);
+        }
+
+        /* 사용자 아이콘 */
+        .user-icon {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #3a3a3a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .user-icon:hover {
+            background-color: #4a4a4a;
+        }
+
+        .user-icon svg {
+            width: 20px;
+            height: 20px;
+            stroke: #f8b58e;
+        }
+
+        /* 결과 영역 */
+        #resultArea {
+            width: 100%;
+            max-width: 900px;
+            margin: 30px auto 40px;
+            padding: 0 20px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .search-state #resultArea {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* 책 결과 박스 - 카드만 그림자 강조 */
+        .bookBox {
+            display: flex;
+            gap: 24px;
+            padding: 28px;
+            margin-bottom: 20px;
+            background-color: #3a3a3a;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .bookBox:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+            background-color: #404040;
+        }
+
+        /* 책 이미지 */
+        .bookImg {
+            width: 110px;
+            height: 160px;
+            object-fit: cover;
+            border-radius: 8px;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        /* 우측 컨테이너 */
+        .rightContainer {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            gap: 16px;
+        }
+
+        .BooksInfo {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .bookTitle {
+            font-size: 20px;
+            font-weight: 700;
+            color: #ffffff;
+            line-height: 1.4;
+        }
+
+        .bookMetaData {
+            color: #999;
+            font-size: 13px;
+        }
+
+        .hashTag {
+            font-size: 13px;
+            color: #f8b58e;
+            font-weight: 500;
+        }
+
+        .bookDescrip {
+            font-size: 14px;
+            color: #cccccc;
+            line-height: 1.6;
+            margin-top: 4px;
+        }
+
+        .recReason {
+            font-size: 14px;
+            color: #b0b0b0;
+            line-height: 1.6;
+            padding: 12px;
+            background-color: #2b2b2b;
+            border-radius: 8px;
+            border-left: 3px solid #f8b58e;
+        }
+
+        /* 버튼 - 위계 분리 */
+        .buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: auto;
+        }
+
+        /* 메인 버튼 (구매하기) */
+        .buttons button {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 7px;
+            cursor: pointer;
+            background-color: #f8b58e;
+            color: #2b2b2b;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .buttons button:hover {
+            background-color: #f5a572;
+        }
+
+        /* 보조 버튼 (북마크) */
+        .buttons button:last-child {
+            background-color: transparent;
+            border: 1.5px solid #555;
+            color: #ccc;
+            box-shadow: none;
+        }
+
+        .buttons button:last-child:hover {
+            background-color: #333;
+            border-color: #666;
+            transform: none;
+        }
+
+        .buttons a {
+            text-decoration: none;
+        }
+
+        /* 반응형 */
+        @media (max-width: 768px) {
+            .logo-text {
+                font-size: 32px;
+            }
+
+            .bookBox {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .bookImg {
+                width: 140px;
+                height: 200px;
+            }
+
+            .buttons {
+                justify-content: center;
+            }
+        }
+    </style>
 </head>
 <body>
-<div class="getUserMessage">
-    <textarea id="Chat-input" class="roros" placeholder="메세지를 입력하세오"></textarea>
-    <button id="gogo" class="btngogo">보내기</button>
+<!-- 사용자 아이콘 -->
+<div class="user-icon">
+    <svg fill="none" viewBox="0 0 24 24" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+    </svg>
 </div>
-<script>
-    let sendbutton = document.querySelector(".btngogo");
-    sendbutton.addEventListener('click',getUserMessage);
 
-    function getUserMessage(){
+<div class="container main-state">
+    <!-- 헤더 (로고 + 제목) -->
+    <div class="header">
+        <div class="logo">
+            <div class="logo-icon">📚</div>
+            <span class="logo-text">ReforəR</span>
+        </div>
+        <p class="subtitle">독서에 이유를 얹거다</p>
+    </div>
+
+    <!-- 검색창 -->
+    <div class="search-wrapper">
+        <div class="getUserMessage">
+            <textarea id="Chat-input" class="roros" placeholder="그래도 책은 읽어야 하지 않을까?"></textarea>
+            <button id="gogo" class="btngogo">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- 결과 영역 -->
+    <div id="resultArea"></div>
+</div>
+
+<script>
+    const textarea = document.querySelector(".roros");
+    const container = document.querySelector(".container");
+    const resultArea = document.querySelector("#resultArea");
+
+    // textarea 자동 높이 조절
+    textarea.addEventListener("focus", function() {
+        this.style.height = "auto";
+        this.style.height = this.scrollHeight + "px";
+    });
+
+    textarea.addEventListener("input", function() {
+        this.style.height = "auto";
+        this.style.height = this.scrollHeight + "px";
+    });
+
+    textarea.addEventListener("blur", function() {
+        if (!this.value) {
+            this.style.height = "52px";
+        }
+    });
+
+    // Enter 키로 전송
+    textarea.addEventListener("keypress", function(e) {
+        if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            getUserMessage();
+        }
+    });
+
+    let sendbutton = document.querySelector(".btngogo");
+    sendbutton.addEventListener('click', getUserMessage);
+
+    function getUserMessage() {
         let message = document.querySelector(".roros");
-        let userMessage = message.value;
+        let userMessage = message.value.trim();
+
+        if (!userMessage) return;
+
         sendUserMessage(userMessage);
     }
 
     function sendUserMessage(message) {
+        // 이전 결과 제거
+        resultArea.innerHTML = '';
+
+        // 검색 상태로 전환
+        container.classList.remove('main-state');
+        container.classList.add('search-state');
+
         let body = JSON.stringify({
             'message': message
         });
@@ -32,102 +458,111 @@
             },
             body: body
         })
-        .then((response) => response.json())
-            .then((data) => getBooksFromJSON(data))
+            .then((response) => response.json())
+            .then((data) => {
+                console.log('서버 응답:', data); // 디버깅용
+                return getBooksFromJSON(data);
+            })
             .then((books) => foundBooksInIndex(books))
+            .catch((error) => {
+                console.error('Error:', error);
+                // 에러 메시지 표시
+                resultArea.innerHTML = '<p style="color: #999; text-align: center; padding: 40px;">서버와 연결할 수 없습니다.</p>';
+            });
     }
 
-    function getBooksFromJSON(data){
+    function getBooksFromJSON(data) {
         return data.items.books;
     }
 
-    function foundBooksInIndex(data){
+    function foundBooksInIndex(data) {
+        if (!data || data.length === 0) {
+            resultArea.innerHTML = '<p style="color: #999; text-align: center; padding: 40px;">검색 결과가 없습니다.</p>';
+            return;
+        }
+
         let len = data.length;
 
-        for (let i = 0; i < len; i++){
-            let isEnd;
-
-            if (i === len){
-                isEnd = true;
-            } else {
-                isEnd = false;
-            }
-            createElement(data[i], isEnd);
+        for (let i = 0; i < len; i++) {
+            createElement(data[i]);
         }
     }
 
-    function createElement(book, isEnd){
+    function createElement(book) {
         const booksDiv = document.createElement("div");
-        const buttons = document.createElement("div");
-        const bookInfo = document.createElement("div");
+        booksDiv.className = "bookBox";
 
-        const bookTitle = document.createElement("span");
-        const bookMetaData = document.createElement("span");
-        const tags = document.createElement("p");
-        const description = document.createElement("p");
-        const recReason = document.createElement("p");
+        // 왼쪽 이미지
+        const bookImgDiv = document.createElement("div");
         const bookImg = document.createElement("img");
-
-        const buyButtonSrc = document.createElement("a");
-        const buyButton = document.createElement("button");
-        const bookMarkButton = document.createElement("button");
-
-        bookInfo.className="BooksInfo";
-
         bookImg.className = "bookImg";
-        bookImg.src = book.image;
-        console.log(book.image);
+        bookImg.src = book.image || "https://via.placeholder.com/110x160?text=No+Image";
+        bookImgDiv.appendChild(bookImg);
 
+        // 오른쪽 컨테이너
+        const rightContainer = document.createElement("div");
+        rightContainer.className = "rightContainer";
+
+        // 책 정보
+        const bookInfo = document.createElement("div");
+        bookInfo.className = "BooksInfo";
+
+        const bookTitle = document.createElement("div");
         bookTitle.className = "bookTitle";
         bookTitle.textContent = book.title;
 
+        const bookMetaData = document.createElement("div");
         bookMetaData.className = "bookMetaData";
-        bookMetaData.textContent = book.author + " | " + book.publisher + " 출판 | " + book.pubdate;
+        bookMetaData.textContent = `${book.author} | ${book.publisher} 출판 | ${book.pubdate}`;
 
-//        let tag;
-//        for (let i = 0; i < book.tags.length; i++){
-//            tag + book.tags[i];
- //       }
-
+        const tags = document.createElement("p");
         tags.className = "hashTag";
         tags.textContent = (book.tag || []).join(" ");
 
+        const description = document.createElement("p");
         description.className = "bookDescrip";
         description.textContent = book.description;
 
+        const recReason = document.createElement("p");
         recReason.className = "recReason";
         recReason.textContent = book.reason;
 
-        bookInfo.appendChild(bookImg)
         bookInfo.appendChild(bookTitle);
         bookInfo.appendChild(bookMetaData);
-        bookInfo.appendChild(tags)
-        bookInfo.appendChild(description)
+        if (tags.textContent) bookInfo.appendChild(tags);
+        bookInfo.appendChild(description);
         bookInfo.appendChild(recReason);
-        //----------------------------------------------------------------------------
+
+        // 버튼
+        const buttons = document.createElement("div");
         buttons.className = "buttons";
 
-        buyButtonSrc.href = book.link;
+        const buyButton = document.createElement("button");
         buyButton.textContent = "책 구매하기";
-        bookMarkButton.textContent = "북마크하기";
 
-        buyButtonSrc.appendChild(buyButton)
-        buttons.appendChild(buyButtonSrc)
-        buttons.appendChild(bookMarkButton);
-
-        booksDiv.appendChild(bookInfo)
-        booksDiv.appendChild(buttons);
-
-        if (isEnd) {
-            document.body.appendChild(booksDiv);
+        // link가 있으면 a 태그로 감싸기
+        if (book.link) {
+            const buyButtonSrc = document.createElement("a");
+            buyButtonSrc.href = book.link;
+            buyButtonSrc.target = "_blank";
+            buyButtonSrc.appendChild(buyButton);
+            buttons.appendChild(buyButtonSrc);
         } else {
-            const endLine = document.createElement("div");
-            endLine.className = "endLine";
-
-            booksDiv.appendChild(endLine);
-            document.body.appendChild(booksDiv);
+            buttons.appendChild(buyButton);
         }
 
+        const bookMarkButton = document.createElement("button");
+        bookMarkButton.textContent = "북마크하기";
+
+        buttons.appendChild(bookMarkButton);
+
+        rightContainer.appendChild(bookInfo);
+        rightContainer.appendChild(buttons);
+
+        booksDiv.appendChild(bookImgDiv);
+        booksDiv.appendChild(rightContainer);
+
+        resultArea.appendChild(booksDiv);
     }
 </script>
 </body>
